@@ -2,6 +2,7 @@ import React from "react";
 import { Link, Outlet } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { MdOutlineContactPhone } from "react-icons/md";
+import { MdTravelExplore } from 'react-icons/md';
 // import { MdFlight } from "react-icons/md";
 import { MdFlightTakeoff } from "react-icons/md";
 
@@ -13,12 +14,12 @@ const FlightNavbar = () => {
     return (
         <div className="d-flex flex-column min-vh-100">
             <nav className="navbar navbar-expand-lg bg-warning sticky-top ">
-                <ul className="navbar-nav ms-auto">
+                <ul className="navbar-nav ms-auto gap-4">
                     <li className="nav-item fs-3">
-                        <Link className="nav-link" to="/"><IoHome className="fs-2" /></Link>
+                        <Link className="nav-link" to="/"><IoHome className="fs-1" /></Link>
                     </li>
                     <li className="nav-item fs-5 ps-3">
-                        <Link className="nav-link" to="flights"><MdFlightTakeoff className="fs-2" />Search</Link>
+                        <Link className="nav-link" to="flights"><MdTravelExplore className="fs-2" />Search</Link>
                     </li>
                 </ul>
 

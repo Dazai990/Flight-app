@@ -1,250 +1,225 @@
+import React, { useState } from "react";
 import { FaUserEdit } from "react-icons/fa";
-
-//import cityList from "./CityList";
-import React, {useEffect, useState } from "react";
 import cities from "../../database/city_data";
 import airClass from "../../database/class_data";
 import flightList from "../../database/flight_data";
 import FlightSearchResult from "./FlightSearchResult";
 
-const FlightSearch =()=>{
-    const [newSearch, setNewSearch] = useState({
-        flightType:'',
-        fromPlace:'',
-        toPlace:'',
-        departDate:'',
-        returnDate:'',
-        adult:'',
-        child:'',
-        infant:''
-    })
+const FlightSearch = () => {
+  const [newSearch, setNewSearch] = useState({
+    flightType: '',
+    fromPlace: '',
+    toPlace: '',
+    departDate: '',
+    airClass: '',
+    adult: '',
+    child: '',
+    infant: ''
+  });
 
-  // State to hold the selected value
-  const [selectedFlightType, setSelectedFlightType] = useState('');
-  const [selectedFromValue, setFromSelectedValue] = useState('');
+  const [filteredCities, setFilteredCities] = useState(cities);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [filteredData, setFilteredData] = useState(
-    cities.filter(item => item.name != selectedFromValue)
-  );
+  const handleChange = (field) => (e) => {
+    const value = e.target.value;
+    setNewSearch((prev) => ({
+      ...prev,
+      [field]: value
+    }));
 
-  const [selectedToValue, setToSelectedValue] = useState('');
-  const [selectedDepartDate, setDepartDateSelectedValue] = useState('');
-  const [selectedAirClassValue, setAirClassSelectedValue] = useState('');
-
-  const[selectedAdultValue, setAdultSelectedValue] = useState('');
-  const[selectedChildValue, setChildSelectedValue] = useState('');
-  const[selectedInfantValue, setInfantSelectedValue] = useState('');
-
-  const[isSubmitted, setIsSubmitted] = useState(false);
-
-  // Event Handler for Flight Type Radio Button - 
-  const handleFlightType = (event) =>{
-    newSearch.flightType = event.target.value;
-    setSelectedFlightType(newSearch.flightType);    
-  }
-
-  // Event handler for dropdown change - From DropDown Control
-  const handleFromChange = (event) => {
-    const getSelectedFromValue = event.target.value;
-    setFromSelectedValue(getSelectedFromValue);
-    setFilteredData(cities.filter(item => item.name !== getSelectedFromValue ));
-
-    newSearch.fromPlace = event.target.value;
+    if (field === "fromPlace") {
+      setFilteredCities(cities.filter(item => item.name !== value));
+    }
   };
 
-  // Event handler for dropdown change - To DropDown Control
-  const handleToChange = (event) =>{
-    newSearch.toPlace = event.target.value;
-    setToSelectedValue(newSearch.toPlace);    
-  };
-
-  // Event handler for Departure Date change - To DropDown Control
-    const handleDepartDateChange = (event) =>{
-        newSearch.departDate = event.target.value;
-        setDepartDateSelectedValue(newSearch.departDate);    
-      };
-    
-  // Event handler for dropdown change - AirClass DropDown Control
-  const handleAirClassChange = (event) =>{
-    newSearch.airClass = event.target.value;
-    setAirClassSelectedValue(newSearch.airClass);
-  };
-
-  // Event handler for dropdown change - AirClass DropDown Control
-  const handleAdultChange = (event) =>{
-    newSearch.adult =event.target.value;
-    setAdultSelectedValue(newSearch.adult);
-  };
-
-  // Event handler for dropdown change - AirClass DropDown Control
-  const handleChildChange = (event) =>{
-    newSearch.child = event.target.value;
-    setChildSelectedValue(newSearch.child);
-  };
-
-  // Event handler for dropdown change - AirClass DropDown Control
-  const handleInfantChange = (event) =>{
-    newSearch.infant = event.target.value;
-    setInfantSelectedValue(newSearch.infant);
-  };
-
-  // Event Handler for Form Submit
-  const handleSubmit = e=>{
+  const handleSubmit = (e) => {
     e.preventDefault();
-   // alert("Flight Search Request is submitted.");
     setIsSubmitted(true);
-  }
+  };
 
-  //---------------------------------------------------------
+  const filteredFlights = flightList.filter((item) => {
+    return (
+      item.FromPlace.toLowerCase().includes(newSearch.fromPlace.toLowerCase()) &&
+      item.ToPlace.toLowerCase().includes(newSearch.toPlace.toLowerCase())
+    );
+  });
 
-    // Filtered data based on From and To Place Search
-      const filteredFlights = flightList.filter((item) => {
-        const getFromFilter = item.FromPlace.toLowerCase().includes(newSearch.fromPlace.toLowerCase());
-        const getToFilter = item.ToPlace.toLowerCase().includes(newSearch.toPlace.toLowerCase());
-        
-        return getFromFilter && getToFilter;
-    });
+  return (
+    <>
+      {!isSubmitted ? (
+        <div className="container bg-light border rounded-4 p-4 shadow w-100 w-md-75 w-lg-50">
+  <div className="mb-4 text-center">
+    <h2 className="fw-bold text-primary">Search Flights</h2>
+  </div>
+  <form onSubmit={handleSubmit}>
+    {/* Flight Type */}
+    <div className="mb-4">
+      <label className="form-label fw-bold">Flight Type:</label>
+      <div className="d-flex gap-4">
+        {["Round Trip", "One Way"].map((type) => (
+          <div key={type} className="form-check">
+            <input
+              type="radio"
+              id={type}
+              name="flighttype"
+              value={type}
+              onChange={handleChange("flightType")}
+              checked={newSearch.flightType === type}
+              className="form-check-input"
+              required
+            />
+            <label className="form-check-label" htmlFor={type}>
+              {type}
+            </label>
+          </div>
+        ))}
+      </div>
+    </div>
 
-    const FlightSearchList = filteredFlights.map(fItem => <FlightSearchResult key={fItem.id} item={fItem} />);
-  //---------------------------------------------------------
+    {/* From - To - Date */}
+    <div className="row mb-4">
+      <div className="col-md-4 mb-3">
+        <label htmlFor="fromCity" className="form-label fw-bold">From:</label>
+        <select
+          className="form-select"
+          id="fromCity"
+          value={newSearch.fromPlace}
+          onChange={handleChange("fromPlace")}
+          required
+        >
+          <option value="" disabled>-- Select From City --</option>
+          {cities.map((city, idx) => (
+            <option key={idx} value={city.shortName}>
+              {city.name} ({city.shortName})
+            </option>
+          ))}
+        </select>
+      </div>
 
-    return(
-        <>
-        {
-           !isSubmitted &&
-           <div>
-           <div className="container border text-bg-light rounded-4 p-3 w-50 bg-danger">
-                <div className="rounded border text-bg-light">
-                    <h2>Search Flights</h2>
-                </div>            
-            <div className="text-start">
-                <form className="text-light" onSubmit={handleSubmit}>
-                    <fieldset>
-                        <legend className="fs-3" style={{fontWeight:'bold'}}>Flight Details:</legend>
-                        <div className="mb-3">
-                        <label className="form-label mt-3" style={{fontWeight:'bold'}}>Flight Type:</label>
-                            <div className="form-check-group">                        
-                                <span>
-                                    <input type="radio" id="rt" name="flighttype" value="Round Trip"
-                                    onChange={handleFlightType} checked={newSearch.flightType === "Round Trip"}
-                                    required />
-                                    <label className="form-check-label" htmlFor="rt">Round Trip</label>
-                                </span>
-                                <span className="ps-3">
-                                    <input type="radio" id="ow" name="flighttype" value="One Way"
-                                    onChange={handleFlightType} checked={newSearch.flightType === "One Way"}
-                                    required />
-                                    <label className="form-check-label" htmlFor="ow">One Way</label>
-                                </span>                            
-                            </div>
-                        {selectedFlightType && <p>You Selected: {selectedFlightType}</p>}
-                        </div>
-                    
-                        <div className="mb-3">
-                            <label className="form-label" htmlFor="fromCity" style={{fontWeight:'bold'}}>From:</label>
-                            <select className="form-control w-50" id="fromCity" 
-                            value={selectedFromValue} onChange={handleFromChange}>
-                                <option value="" disabled>-- Select From City --</option>
-                                {cities.map((MyOption, index) => (
-                                <option key={index} value={MyOption.shortName}>
-                                    {MyOption.name} ({MyOption.shortName}) 
-                                </option>
-                                ))}
-                            </select>
-                            {selectedFromValue && <p>You selected: {selectedFromValue}</p>}  
-                        
-                            <label className="form-label" htmlFor="toPlace" style={{fontWeight:'bold'}}>To:</label>
-                            <select className="form-control w-50" id="toPlace" 
-                            value={selectedToValue} onChange={handleToChange}>
-                                <option value="" disabled>-- Select To City --</option>
-                                {
-                                    filteredData.map((MyOption, index) =>(
-                                    <option key={index} value={MyOption.shortName}>
-                                        {MyOption.name} ({MyOption.shortName})
-                                    </option>
-                                ) )}
-                            </select>
-                            {selectedToValue && <p>You selected: {selectedToValue}</p>}
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label" htmlFor="departDate">Depart Date: &nbsp;</label>
-                            <input type="date" id="departDate" onChange={handleDepartDateChange} required
-                            className=" border rounded"></input>
-                            {selectedDepartDate && <p>You selected: {selectedDepartDate}</p>}
-                        </div>
-                        </fieldset>
-                        
-                        <div className="mb-3">
-                            <fieldset>
-                                <legend style={{fontWeight:'bold'}}>Traveller Details:</legend>
-                                    <label className="form-label" style={{fontWeight:'bold'}}>Class:</label>
-                                    <select className="form-control w-50" 
-                                    value={selectedAirClassValue} onChange={handleAirClassChange}> 
-                                    <option value="" disabled>-- Select --</option>
-                                        {
-                                            airClass.map((MyOption, index) =>(
-                                            <option key={index} value={MyOption.className}>
-                                                {MyOption.className}
-                                            </option>
-                                        ) )}
-                                    </select>
-                                    {selectedAirClassValue && <p>You selected: {selectedAirClassValue}</p>}
-                        </fieldset>
-                    </div>
-                    <div>
-                        <button className="btn btn-outline-primary me-2 rounded border">Search</button>
-                        <button className="btn btn-outline-light me-2 rounded border">Clear</button>
-                    </div>
-                </form>
-            </div>
-         </div>
-         </div> 
-        }
-        {
-            isSubmitted && 
-            <div>
-                {/* <form onLoad={handleFlightSearch}> */}
-                <div className="container-fluid">
-                    <h2 className="text-center">Search Result</h2>
-                    <div className="container-fluid">
-                        <table className="table b-1">
-                            <tr>
-                                <td><h4>Flight Type : {newSearch.flightType} </h4></td>
-                                <td><h4>From : {newSearch.fromPlace}</h4></td>
-                                <td><h4>To : {newSearch.toPlace}</h4></td>
-                                <td><h4>Depart Date : {newSearch.departDate}</h4></td>
-                                <button className="btn btn-info ms-2 mt-1" 
-                                onClick={()=>setIsSubmitted(false)} title="Edit Search">Edit Search</button>
-                            </tr>
-                        </table>
-                            No Of Flights available:  
-                            <span><b>{filteredFlights.length !== 0 ? 
-                            (filteredFlights.length) : 0 }</b></span>
-                    </div>
-                    <div>
-                            <table className="table stripped ">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th><th>Airlines</th><th>FlightCode</th><th>FromPlace</th>
-                                        <th>ToPlace</th><th>StartTime</th><th>EndTime</th>
-                                        <th>Class</th><th>Fare</th><th>Frequency</th>
-                                        <th>Select Flight</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                     {FlightSearchList}
-                                </tbody>
-                                
-                            </table>
-                            
-                    </div>
-                </div>
-                {/* </form> */}
-            </div>
-        }
-    </>        
-            
-    )
-}
+      <div className="col-md-4 mb-3">
+        <label htmlFor="toCity" className="form-label fw-bold">To:</label>
+        <select
+          className="form-select"
+          id="toCity"
+          value={newSearch.toPlace}
+          onChange={handleChange("toPlace")}
+          required
+        >
+          <option value="" disabled>-- Select To City --</option>
+          {filteredCities.map((city, idx) => (
+            <option key={idx} value={city.shortName}>
+              {city.name} ({city.shortName})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="col-md-4 mb-3">
+        <label htmlFor="departDate" className="form-label fw-bold">Depart Date:</label>
+        <input
+          type="date"
+          id="departDate"
+          className="form-control"
+          value={newSearch.departDate}
+          onChange={handleChange("departDate")}
+          required
+        />
+      </div>
+    </div>
+
+    {/* Travel Class */}
+    <div className="mb-4">
+      <label className="form-label fw-bold">Class:</label>
+      <select
+        className="form-select w-100"
+        value={newSearch.airClass}
+        onChange={handleChange("airClass")}
+        required
+      >
+        <option value="" disabled>-- Select Class --</option>
+        {airClass.map((item, idx) => (
+          <option key={idx} value={item.className}>
+            {item.className}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* Traveller Details (Optional inputs can go here in future) */}
+    {/* 
+    You can add inputs for adults, children, infants here as needed 
+    using the same column layout 
+    */}
+
+    {/* Buttons */}
+    <div className="d-flex justify-content-center gap-3 mt-4">
+      <button type="submit" className="btn btn-primary px-4">
+        Search
+      </button>
+      <button
+        type="button"
+        className="btn btn-outline-secondary px-4"
+        onClick={() => setNewSearch({
+          flightType: '',
+          fromPlace: '',
+          toPlace: '',
+          departDate: '',
+          airClass: '',
+          adult: '',
+          child: '',
+          infant: ''
+        })}
+      >
+        Clear
+      </button>
+    </div>
+  </form>
+</div>
+
+      ) : (
+        <div className="container-fluid">
+          <h2 className="text-center">Search Result</h2>
+          <div className="container-fluid mb-3">
+            <table className="table b-1">
+              <tbody>
+                <tr>
+                  <td><h4>Flight Type : {newSearch.flightType} </h4></td>
+                  <td><h4>From : {newSearch.fromPlace}</h4></td>
+                  <td><h4>To : {newSearch.toPlace}</h4></td>
+                  <td><h4>Depart Date : {newSearch.departDate}</h4></td>
+                  <td>
+                    <button
+                      className="btn btn-info ms-2 mt-1"
+                      onClick={() => setIsSubmitted(false)}
+                      title="Edit Search"
+                    >
+                      <FaUserEdit /> Edit Search
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div>No Of Flights available: <b>{filteredFlights.length}</b></div>
+          </div>
+
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Id</th><th>Airlines</th><th>FlightCode</th><th>From</th>
+                <th>To</th><th>Start</th><th>End</th><th>Class</th>
+                <th>Fare</th><th>Frequency</th><th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredFlights.map(fItem => (
+                <FlightSearchResult key={fItem.id} item={fItem} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+};
 
 export default FlightSearch;

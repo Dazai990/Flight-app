@@ -9,7 +9,7 @@ const CreditCard = ()=>{
   const handleSubmit = e=>{
     e.preventDefault();
     alert("Payment Successful");
-    navigation('/payment')
+    navigation('/')
   }
   return (
     <>
@@ -65,7 +65,7 @@ const CreditCard = ()=>{
       </Link>
       </div>
     </>
-
+    
   );
 };
 export default CreditCard;
